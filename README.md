@@ -1,5 +1,12 @@
 # An OpenSheaf collection
 
+> [!WARNING]
+> **Draft.** OpenSheaf 0.1 is a draft specification. Until version 1.0, any
+> revision may change the format in incompatible ways (one already did:
+> `provenance.json` became `object.json`). Archives and collections made now
+> may have to be rebuilt or migrated, and the tools follow the latest draft.
+> Do not rely on it yet for anything you cannot redo.
+
 A template for a curated collection of papers kept in other archives: a
 reading list, the papers of a group, a seminar, a special issue. Nothing is
 copied: each member is an object of an [OpenSheaf](https://opensheaf.org)
