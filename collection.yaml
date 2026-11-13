@@ -1,17 +1,30 @@
 # The members of the collection, in the order you want, for
 # `osheaf collection sync --from collection.yaml`. Each member is an object of
 # an OpenSheaf archive: the archive's address and the object's identifier.
-# Nothing is copied: each member is pinned by the SHA-512 digest of the
-# inventory of the version you list, checked against the archive.
+# Nothing is copied: each member is pinned by the SHA-512 digest of an
+# inventory, checked against the archive.
+#
+# A reading list vets particular versions of the papers it recommends: it is a
+# selection. Each member lists its revisions, the document versions you read
+# and recommend (1, 2, ...); a member without `revisions` is vetted in its
+# current version when it is first synced. `osheaf collection update` never
+# changes a selection: it tells you which members have versions you have not
+# vetted, and you add them here if you wish.
+#
+# For a collection that follows its members whatever their authors add (the
+# papers of a group, a list of preserved objects), write `type: archive`
+# instead: members are then followed (`osheaf collection update` pins their
+# newest object version), unless they give a fixed `version: vN`.
 title: A reading list on stochastic quantisation
 description: Papers on the stochastic quantisation of Euclidean field theories, from the archives they are kept in.
+type: selection
 order: manual
 members:
   - archive: https://mgubi.org/papers/
-    id: fractional-phi42-mass-gap        # follows the current version (osheaf collection update)
+    id: fractional-phi42-mass-gap        # vetted in its current version when first synced
   - archive: https://mgubi.org/papers/
     id: phi43-variational
   - archive: https://mgubi.org/papers/
     id: paracontrolled-distributions
-    version: v5                          # a fixed version: not followed
+    revisions: [5]                       # the document version recommended
   - {archive: https://mgubi.org/papers/, id: sine-gordon-fbsde}

@@ -7,7 +7,8 @@
 #     with all their versions, in their own archive (here imported from arXiv).
 #     The journal copies exactly the version it vetted (osheaf accept) into a
 #     document of its own archive, byte for byte, recording its source and pin;
-#     its issue is a collection of these documents. The authors' later
+#     its issue is a selection of these documents, pinning the revisions the
+#     editors vetted. The authors' later
 #     versions change nothing at the journal: a correction is an editorial
 #     act, a new version of the journal's document made by the editors. Only
 #     the vetted version needs an open licence (or the authors' agreement), so
@@ -43,20 +44,40 @@ done
 step "a paper whose v1 is under arXiv's licence: a full mirror is refused, but its vetted v2 is CC BY and can be accepted"
 if osheaf --root "$J" mirror "$A" fictitious-walks; then echo "expected a refusal"; exit 1; fi
 osheaf --root "$J" accept "$A" fictitious-walks --version v2 --stage VoR --type JournalArticle
-osheaf --root "$J" collect && osheaf --root "$J" index && osheaf --root "$J" verify
+osheaf --root "$J" collect
+
+step "the issue: a selection of the accepted copies, each vetted in its first version"
+issue() {
+  echo "title: Volume 7, issue 1"
+  echo "description: The papers accepted, in the versions the editors vetted."
+  echo "type: selection"
+  echo "members:"
+  echo "  - {archive: ., id: hirche-network-discrimination, revisions: [$1]}"
+  echo "  - {archive: ., id: singal-stabiliser-codes, revisions: [1]}"
+  echo "  - {archive: ., id: peters-generalization-overfitting, revisions: [1]}"
+  echo "  - {archive: ., id: fictitious-walks, revisions: [1]}"
+}
+issue 1 > "$W/issue.yaml"
+osheaf --root "$J" collection sync issue-1 --from "$W/issue.yaml"
+osheaf --root "$J" index
+osheaf --root "$J" verify --remote      # also compares the accepted copies with their sources
 
 step "the authors post a new version: the journal's documents do not change"
 osheaf --root "$A" deposit hirche-network-discrimination "$EX/papers/random-walks/v2/paper.tex" \
   --pdf "$EX/papers/random-walks/v2/paper.pdf" --title "Quantum Network Discrimination" \
   --author "Hirche, Christoph" --changes "A later version by the author (invented, for the demonstration)."
 osheaf --root "$A" collect && osheaf --root "$A" index
-osheaf --root "$J" collect
+osheaf --root "$J" collect && osheaf --root "$J" collection update issue-1
 
 step "the editors correct a paper: an editorial act, a new version of the journal's document"
 osheaf --root "$J" notice singal-stabiliser-codes --about 1 --text "An invented erratum, issued by the editors."
 osheaf --root "$J" accept "$A" hirche-network-discrimination --version v3 \
   --changes "Corrected by the editors: the author's version v3 replaces v2 (an invented correction)."
-osheaf --root "$J" collect && osheaf --root "$J" index && osheaf --root "$J" verify
+osheaf --root "$J" collect
+osheaf --root "$J" collection update issue-1      # reports the correction, does not vet it
+issue "1, 2" > "$W/issue.yaml"                    # the editors vet it: a new version of the issue
+osheaf --root "$J" collection sync issue-1 --from "$W/issue.yaml"
+osheaf --root "$J" index && osheaf --root "$J" verify --remote
 
 step "the authors' archive disappears: the journal's documents are its own, and still verify"
 mv "$A" "$W/authors.gone"
