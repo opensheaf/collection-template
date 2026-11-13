@@ -3,13 +3,15 @@
 # (quantum-journal.org, volume 7, 2023; CC BY 4.0) in the example papers.
 # An unofficial demonstration: not made by or for Quantum.
 #
-#  1. A journal that MIRRORS the papers: the authors keep their papers in their
-#     own archive (here imported from arXiv); the journal's issue is a curated
-#     collection that copies each paper (every version, byte for byte) into the
-#     journal's archive, which the CC BY licence of every version allows. A paper
-#     whose first version is not openly licensed cannot be mirrored: the journal
-#     only references it. When the authors' archive disappears, the issue is
-#     still checked and served from the journal's copies.
+#  1. A journal that ACCEPTS a vetted version: the authors keep their papers,
+#     with all their versions, in their own archive (here imported from arXiv).
+#     The journal copies exactly the version it vetted (osheaf accept) into a
+#     document of its own archive, byte for byte, recording its source and pin;
+#     its issue is a collection of these documents. The authors' later
+#     versions change nothing at the journal: a correction is an editorial
+#     act, a new version of the journal's document made by the editors. Only
+#     the vetted version needs an open licence (or the authors' agreement), so
+#     a paper whose first arXiv version is not openly licensed can be accepted.
 #  2. A journal that REPACKAGES the papers: it deposits its own version of
 #     record (its typeset PDF, its DOI, its licence, the authors' agreement)
 #     as documents of its own archive, linked to the authors' arXiv versions.
@@ -19,7 +21,7 @@ set -euo pipefail
 HERE=$(cd "$(dirname "$0")/.." && pwd)
 EX=$(cd "${1:-$HERE/../example-papers}" && pwd)
 W=${2:-$(mktemp -d)}
-A=$W/authors J=$W/journal-mirror V=$W/journal-vor
+A=$W/authors J=$W/journal-accept V=$W/journal-vor
 step() { printf '\n== %s\n' "$*"; }
 
 step "the authors' archive: the Quantum papers from arXiv (every version CC BY), and a paper whose v1 is not openly licensed"
@@ -29,37 +31,37 @@ osheaf --root "$A" arxiv import "$EX/journal-quantum"
 osheaf --root "$A" arxiv import "$EX/arxiv-downloads" 0000.00001
 osheaf --root "$A" collect && osheaf --root "$A" index
 
-step "1. a journal that mirrors: an issue as a curated collection, its papers copied into the journal's archive"
-mkdir -p "$J" && cp -R "$HERE/templates" "$J/templates"
-osheaf init "$J" --curated --archive-id tag:example.org,2026:journal-mirror \
-  --name "A mirroring journal (unofficial demonstration with papers of Quantum 7)" \
-  --base-url https://example.org/journal-mirror/ --curator "Example, Ada"
-cat > "$W/issue.yaml" <<YAML
-title: "Volume 7 (2023), a selection"
-description: "Papers of Quantum, volume 7 (2023), mirrored from their authors' archive under CC BY 4.0. An unofficial demonstration, not made by or for Quantum."
-members:
-  - {archive: $A, id: hirche-network-discrimination, mirror: yes}
-  - {archive: $A, id: singal-stabiliser-codes, mirror: yes}
-  - {archive: $A, id: peters-generalization-overfitting, mirror: yes}
-YAML
-osheaf --root "$J" collection sync --from "$W/issue.yaml"
+step "1. a journal that accepts vetted versions: v2 of each paper, copied into documents of its own"
+osheaf init "$J" --archive-id tag:example.org,2026:journal-accept \
+  --name "An accepting journal (unofficial demonstration with papers of Quantum 7)" \
+  --base-url https://example.org/journal-accept/ --curator "Example, Ada"
+for p in hirche-network-discrimination singal-stabiliser-codes peters-generalization-overfitting; do
+  osheaf --root "$J" accept "$A" "$p" --version v2 --stage VoR --type JournalArticle \
+    --agreement "the journal's publication terms (CC BY 4.0)"
+done
 
-step "a paper whose v1 is under arXiv's licence cannot be mirrored (the tool refuses) ..."
+step "a paper whose v1 is under arXiv's licence: a full mirror is refused, but its vetted v2 is CC BY and can be accepted"
 if osheaf --root "$J" mirror "$A" fictitious-walks; then echo "expected a refusal"; exit 1; fi
-step "... so the journal only references it: a pin needs no permission"
-cat >> "$W/issue.yaml" <<YAML
-  - {archive: $A, id: fictitious-walks}
-YAML
-osheaf --root "$J" collection sync --from "$W/issue.yaml"
-osheaf --root "$J" index
-osheaf --root "$J" verify --remote
+osheaf --root "$J" accept "$A" fictitious-walks --version v2 --stage VoR --type JournalArticle
+osheaf --root "$J" collect && osheaf --root "$J" index && osheaf --root "$J" verify
 
-step "the authors' archive disappears: the mirrored papers are checked on the journal's copies, the reference is reported"
+step "the authors post a new version: the journal's documents do not change"
+osheaf --root "$A" deposit hirche-network-discrimination "$EX/papers/random-walks/v2/paper.tex" \
+  --pdf "$EX/papers/random-walks/v2/paper.pdf" --title "Quantum Network Discrimination" \
+  --author "Hirche, Christoph" --changes "A later version by the author (invented, for the demonstration)."
+osheaf --root "$A" collect && osheaf --root "$A" index
+osheaf --root "$J" collect
+
+step "the editors correct a paper: an editorial act, a new version of the journal's document"
+osheaf --root "$J" notice singal-stabiliser-codes --about 1 --text "An invented erratum, issued by the editors."
+osheaf --root "$J" accept "$A" hirche-network-discrimination --version v3 \
+  --changes "Corrected by the editors: the author's version v3 replaces v2 (an invented correction)."
+osheaf --root "$J" collect && osheaf --root "$J" index && osheaf --root "$J" verify
+
+step "the authors' archive disappears: the journal's documents are its own, and still verify"
 mv "$A" "$W/authors.gone"
-if osheaf --root "$J" verify --remote; then echo "expected the reference to be reported"; exit 1; fi
-osheaf --root "$J" index
+osheaf --root "$J" verify
 mv "$W/authors.gone" "$A"
-osheaf --root "$J" verify --remote
 
 step "2. a journal that repackages: its versions of record, with its licence and the authors' agreement"
 osheaf init "$V" --archive-id tag:example.org,2026:journal-vor \
@@ -69,4 +71,4 @@ osheaf --root "$V" deposit --from "$EX/deposits/quantum-vor.yaml"
 osheaf --root "$V" collect && osheaf --root "$V" index
 osheaf --root "$V" verify
 
-printf '\nThe mirroring journal is in %s, the publishing journal in %s.\n' "$J" "$V"
+printf '\nThe accepting journal is in %s, the publishing journal in %s.\n' "$J" "$V"
