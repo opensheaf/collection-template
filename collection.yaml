@@ -1,0 +1,17 @@
+# The members of the collection, in the order you want, for
+# `osheaf collection sync --from collection.yaml`. Each member is an object of
+# an OpenSheaf archive: the archive's address and the object's identifier.
+# Nothing is copied: each member is pinned by the SHA-512 digest of the
+# inventory of the version you list, checked against the archive.
+title: A reading list on stochastic quantisation
+description: Papers on the stochastic quantisation of Euclidean field theories, from the archives they are kept in.
+order: manual
+members:
+  - archive: https://mgubi.org/papers/
+    id: fractional-phi42-mass-gap        # follows the current version (osheaf collection update)
+  - archive: https://mgubi.org/papers/
+    id: phi43-variational
+  - archive: https://mgubi.org/papers/
+    id: paracontrolled-distributions
+    version: v5                          # a fixed version: not followed
+  - {archive: https://mgubi.org/papers/, id: sine-gordon-fbsde}

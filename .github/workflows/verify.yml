@@ -1,0 +1,16 @@
+# Check the collection on every push (osheaf verify --remote: the checks of
+# section 14, and every member fetched from its archive and its pin checked).
+name: verify
+on: [push, pull_request]
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: pip install "opensheaf[validate] @ git+https://github.com/opensheaf/opensheaf-py"
+      - name: osheaf verify
+        run: |
+          if [ -f osheaf.json ]; then osheaf verify --remote; else echo "not set up yet: run osheaf init (see README)"; fi

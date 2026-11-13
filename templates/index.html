@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{archive_name}}</title>
+<link rel="stylesheet" href="{{root}}style.css">
+<link rel="describedby" href="{{root}}opensheaf.json" type="application/json">
+<script>window.MathJax = {tex: {inlineMath: [['$', '$']], processEscapes: true}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+<header>
+  <h1>{{archive_name}}</h1>
+  <p class="lead">{{lead}}</p>
+</header>
+<main>
+  <ol class="papers">
+{{papers}}
+  </ol>
+</main>
+<footer>
+  <p>{{count}} documents · updated {{updated}} ·
+  made with <a href="https://github.com/opensheaf/opensheaf-py">opensheaf-py</a></p>
+</footer>
+</body>
+</html>

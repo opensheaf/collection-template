@@ -1,0 +1,21 @@
+# The testing ground: build a member archive from the example papers and a
+# curated collection, and run the workflows of collections (examples/run.sh).
+name: examples
+on:
+  push:
+  pull_request:
+  schedule: [{cron: "0 6 * * 1"}]
+  workflow_dispatch:
+jobs:
+  examples:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {repository: opensheaf/example-papers, path: example-papers}
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.13"}
+      - run: pip install "opensheaf[validate] @ git+https://github.com/opensheaf/opensheaf-py"
+      - run: examples/run.sh example-papers "$RUNNER_TEMP/work"
+      - uses: actions/upload-artifact@v4
+        with: {name: example-collection, path: "${{ runner.temp }}/work"}

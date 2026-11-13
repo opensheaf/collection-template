@@ -1,0 +1,3 @@
+# Deposited files are served byte for byte: git must never convert them.
+ocfl/** -text
+*.pdf binary

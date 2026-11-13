@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{title}} · {{archive_name}}</title>
+{{head}}
+<link rel="stylesheet" href="{{root}}style.css">
+<script>window.MathJax = {tex: {inlineMath: [['$', '$']], processEscapes: true}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+<nav><a href="{{root}}">{{archive_name}}</a></nav>
+<main class="paper-page">
+  <h1>{{title}}</h1>
+  <p class="paper-authors">{{authors}}</p>
+  <p class="paper-meta">First issued {{issued}} · <a href="{{pdf}}">PDF of the current version</a></p>
+  {{withdrawn}}
+  <section class="abstract">
+    <h2>Abstract</h2>
+    {{abstract}}
+  </section>
+  <section>
+    <h2>Versions</h2>
+    <ol class="versions">
+{{versions}}
+    </ol>
+  </section>
+  <section>
+    <h2>Cite</h2>
+    <p class="cite">{{cite}}</p>
+    <p class="small">Licence: {{licence}}</p>
+    <p class="small">Pin of the current version (SHA-512 of its inventory):
+    <a href="{{pin_url}}"><code>{{pin}}</code></a></p>
+  </section>
+</main>
+<footer>
+  <p>An <a href="https://opensheaf.org">OpenSheaf</a> archive ·
+  made with <a href="https://github.com/opensheaf/opensheaf-py">opensheaf-py</a></p>
+</footer>
+</body>
+</html>
