@@ -17,5 +17,8 @@ jobs:
         with: {python-version: "3.13"}
       - run: pip install "opensheaf[validate] @ git+https://github.com/opensheaf/opensheaf-py"
       - run: examples/run.sh example-papers "$RUNNER_TEMP/work"
+      - run: examples/journals.sh example-papers "$RUNNER_TEMP/journals"
       - uses: actions/upload-artifact@v4
         with: {name: example-collection, path: "${{ runner.temp }}/work"}
+      - uses: actions/upload-artifact@v4
+        with: {name: example-journals, path: "${{ runner.temp }}/journals"}

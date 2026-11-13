@@ -99,6 +99,23 @@ whose pin is kept, a member that disappears and is reported by
 `examples/run.sh` (`OFFLINE=1` leaves out the real archive). The workflow
 `examples` runs it on every push and every week.
 
+## Journals
+
+`examples/journals.sh` builds two journals from real papers of
+[Quantum](https://quantum-journal.org) (volume 7, 2023, CC BY 4.0; an
+unofficial demonstration, not made by or for Quantum):
+
+- a journal that **mirrors** the papers: its issue is a curated collection
+  whose members (`mirror: yes`) are copied, every version and byte for byte,
+  into the journal's archive, which their CC BY licences allow; a paper whose
+  first version is not openly licensed is refused as a mirror and only
+  referenced; when the authors' archive disappears, `verify --remote` checks
+  the mirrored papers on the journal's copies and reports the reference;
+- a journal that **repackages** the papers: it deposits its versions of record
+  (its typeset PDF, its DOI, its licence, the authors' agreement in
+  `object.json`) as documents of its own archive, linked to the authors'
+  arXiv versions.
+
 ## Licence
 
 This template is dedicated to the public domain under [CC0 1.0](LICENSE). The
