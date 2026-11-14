@@ -18,7 +18,7 @@ A collection is one of two kinds (section 10 of the specification):
   read and recommend, a journal issue the versions its editors accepted. Its
   members pin those versions (their *revisions*), and nothing changes unless
   you change it;
-- an **archive collection** follows its members whatever their authors add:
+- a **catalogue** follows its members whatever their authors add:
   the papers of a group, the objects an archive preserves. Its members pin
   the newest object version, and `osheaf collection update` moves them on. The collection is plain files in a git repository, with a website
 listing its members, and is kept with
@@ -64,8 +64,8 @@ members:
 `revisions` lists the document versions you vet (1, 2, ...); a member
 without it is vetted in its current version when first synced, and keeps
 that revision. To vet a later version too, add it (`revisions: [5, 6]`) and
-sync again: that is a new version of the selection, your act. For an
-archive collection write `type: archive`: its members follow their objects
+sync again: that is a new version of the selection, your act. For a
+catalogue write `type: catalogue`: its members follow their objects
 (`follow: latest`), unless you fix one with `version: vN`. A member may be
 a document or another collection, in any OpenSheaf archive. Then
 
@@ -77,10 +77,10 @@ git add -A && git commit -m "Members" && git push
 ```
 
 `sync` reads each member's archive (its `opensheaf.json`, the object's
-inventory and history), pins the revisions you vet (or, in an archive
-collection, the newest object version), checks each pin against the checksum
-file the archive publishes, and caches a citation, so that the list stays
-readable even if a member's archive disappears. A new version of the
+inventory and history), pins the revisions you vet (or, in a catalogue,
+the newest object version), checks each pin against the checksum file the
+archive publishes, and caches a citation, so that the list stays readable
+even if a member's archive disappears. A new version of the
 collection is written only when the list or a pin changes.
 
 ## 4. Keep it up to date
@@ -90,7 +90,7 @@ osheaf collection update
 osheaf index
 ```
 
-moves the followed members of an archive collection to the newest versions
+moves the followed members of a catalogue to the newest versions
 of their objects, whatever they hold: a new version, a notice, a
 withdrawal (which the website then shows). A selection is never changed by
 `update`: it lists the versions of your members that you have not vetted,
@@ -108,10 +108,10 @@ the archive template.
 
 `examples/run.sh` builds a member archive from the
 [example papers](https://github.com/opensheaf/example-papers) and two
-collections with members from it and from a real archive: an archive
-collection (followed members, a fixed version, a member that is itself a
+collections with members from it and from a real archive: a
+catalogue (followed members, a fixed version, a member that is itself a
 collection) and a selection (a reading list). It goes through their
-workflows: a new version, followed by the archive collection and only
+workflows: a new version, followed by the catalogue and only
 reported by the selection until the curator vets it; a withdrawal, followed
 by one and shown by both; a member that disappears and is reported by
 `verify --remote`. Clone the example papers next to this repository and run

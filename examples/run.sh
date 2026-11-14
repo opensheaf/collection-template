@@ -23,14 +23,14 @@ osheaf --root "$M" deposit --from "$EX/deposits/heat-notes.yaml"
 osheaf --root "$M" arxiv import "$EX/arxiv-real"
 osheaf --root "$M" collect && osheaf --root "$M" index
 
-step "an archive collection: members from the member archive and from a real archive, followed"
+step "a catalogue: members from the member archive and from a real archive, followed"
 mkdir -p "$C" && cp -R "$HERE/templates" "$C/templates"
 osheaf init "$C" --curated --archive-id tag:example.org,2026:reading --name "A reading list" \
   --base-url https://example.org/reading/ --curator "Example, Ada"
 {
   echo "title: The papers of a group"
   echo "description: Members from two archives, followed as they grow, in the curator's order."
-  echo "type: archive"
+  echo "type: catalogue"
   echo "members:"
   echo "  - {archive: $M, id: random-walks}                        # followed"
   echo "  - {archive: $M, id: heat-notes, version: v1}             # a fixed version"
@@ -62,7 +62,7 @@ osheaf --root "$C" collection sync reading --from "$W/reading.yaml"  # a second 
 osheaf --root "$C" index
 osheaf --root "$C" verify --remote
 
-step "a new version in the member archive: the archive collection follows it, the selection does not"
+step "a new version in the member archive: the catalogue follows it, the selection does not"
 osheaf --root "$M" deposit random-walks "$EX/papers/random-walks/v2/paper.tex" \
   --pdf "$EX/papers/random-walks/v2/paper.pdf" --title "Random walks on a fictitious lattice" \
   --author "Example, Ada" --changes "A new version, to be followed by the collection."
@@ -75,7 +75,7 @@ sed -i.bak 's/id: random-walks, revisions: \[1\]/id: random-walks, revisions: [1
 osheaf --root "$C" collection sync reading --from "$W/reading.yaml"
 osheaf --root "$C" index && osheaf --root "$C" verify --remote
 
-step "a member is withdrawn: the archive collection follows the withdrawal; the selection keeps its revision, and both show the withdrawal"
+step "a member is withdrawn: the catalogue follows the withdrawal; the selection keeps its revision, and both show the withdrawal"
 osheaf --root "$M" withdraw kobayashi-park --reason "An invented withdrawal, to try collections."
 osheaf --root "$C" collection update && osheaf --root "$C" collection update reading && osheaf --root "$C" index
 osheaf --root "$C" verify --remote

@@ -12,7 +12,7 @@
 # vetted, and you add them here if you wish.
 #
 # For a collection that follows its members whatever their authors add (the
-# papers of a group, a list of preserved objects), write `type: archive`
+# papers of a group, a list of preserved objects), write `type: catalogue`
 # instead: members are then followed (`osheaf collection update` pins their
 # newest object version), unless they give a fixed `version: vN`.
 title: A reading list on stochastic quantisation
