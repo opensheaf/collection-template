@@ -20,6 +20,10 @@ body:
       required: true
   - type: input
     attributes:
+      label: In collection
+      description: The identifier of a subcollection of this repository; empty for the main collection.
+  - type: input
+    attributes:
       label: Archive of the member
       description: Only if two members have the same identifier.
   - type: input

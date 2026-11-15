@@ -1,4 +1,5 @@
-# Members added, vetted or removed from the issue forms in
+# Members added, vetted or removed, documents deposited and subcollections
+# created from the issue forms in
 # .github/ISSUE_TEMPLATE: for curators who use neither git nor the command
 # line. The workflow checks that the issue's author may write to the
 # repository, changes collection.yaml and runs osheaf
@@ -19,7 +20,9 @@ jobs:
     if: >-
       contains(github.event.issue.body, '### Archive of the new member') ||
       contains(github.event.issue.body, '### Versions to vet') ||
-      contains(github.event.issue.body, '### Member to remove')
+      contains(github.event.issue.body, '### Member to remove') ||
+      contains(github.event.issue.body, '### PDF of this version') ||
+      contains(github.event.issue.body, '### Identifier of the new subcollection')
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ github.token }}

@@ -23,8 +23,21 @@ jobs:
       - name: osheaf collection update
         run: |
           if [ ! -f osheaf.json ]; then echo "Not set up yet: run Set up the collection first." | tee -a "$GITHUB_STEP_SUMMARY"; exit 1; fi
+          # the subcollections first, then the main collection, which includes them
+          for f in collections/*.yaml; do
+            [ -f "$f" ] || continue
+            id=$(basename "$f" .yaml)
+            out=$(osheaf collection update "$id" 2>&1); status=$?
+            { echo "## $id"; echo; echo '```'; echo "$out"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+            [ $status -eq 0 ] || exit $status
+          done
+          # collections that include a moved subcollection follow it (in a selection,
+          # its new version is vetted: the curator asked for the update)
+          python3 -c 'import sys; sys.path.insert(0, ".github/scripts"); import osheaf_issue as o
+          for c in o.all_collections()[1:]:
+              o.propagate(c, "Update the collection")'
           out=$(osheaf collection update 2>&1); status=$?
-          { echo "## osheaf collection update"; echo; echo '```'; echo "$out"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          { echo "## The main collection"; echo; echo '```'; echo "$out"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
           [ $status -eq 0 ] || exit $status
           osheaf index
           osheaf verify

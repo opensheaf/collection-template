@@ -46,12 +46,22 @@ Both give the same collection, and can be mixed.
    - **Add a member**: the address of the member's archive and the object's
      identifier (and, in a selection, the versions you vet);
    - **Vet a new version** (selections): a later version of a member;
-   - **Remove a member**.
+   - **Remove a member**;
+   - **New document**: a document with no archive of its own (seminar notes,
+     an introduction), deposited in this repository with its PDF and
+     sources and added to a collection; the same form makes a new version;
+   - **New subcollection**: a collection inside another (a section of a
+     reading list, an issue of a journal, a week of a seminar). Its members
+     are then managed with the forms above, naming it in **In collection**.
 
-   The workflow `from issue` changes `collection.yaml`, runs `osheaf
-   collection sync`, publishes the site and answers in the issue.
+   The workflow `from issue` changes `collection.yaml` (or
+   `collections/ID.yaml` for a subcollection), runs `osheaf collection sync`,
+   brings the collections that include a changed subcollection up to date
+   (in a selection, the subcollection's new version is vetted), publishes the
+   site and answers in the issue.
 4. To follow new versions of the members: **Actions**, **Update the
-   collection**, **Run workflow**. A catalogue moves on; a selection never
+   collection**, **Run workflow** (the subcollections, then the main
+   collection). A catalogue moves on; a selection never
    changes by itself, and the run's page lists the versions you have not
    vetted. To run it every week, add `schedule: [{cron: "0 6 * * 1"}]` under
    `on:` in `.github/workflows/update.yml`.

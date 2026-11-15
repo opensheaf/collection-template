@@ -1,0 +1,90 @@
+name: New document
+description: Deposit a document in this repository and add it to a collection (or a new version of a document already here).
+title: "Document: "
+labels: ["osheaf: document"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For documents that have no archive of their own (seminar notes, an introduction to the collection, a document made for it): the workflow deposits it in this repository, adds it to the collection you name, publishes the site, and answers here. Documents kept in other archives are added with **Add a member** instead. Only the curators can deposit. Everything attached here becomes public.
+
+        **A new version** of a document already here: give the same identifier, attach the new PDF and sources, and say what changed; leave empty what stays the same. In a selection, the new version is vetted (you made it).
+  - type: input
+    attributes:
+      label: Identifier
+      description: Permanent, part of the paper's address. At most 32 characters, lower-case letters and digits, words joined by `-`. For a new version, the identifier of the paper.
+      placeholder: kpz-uniqueness
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Title
+      description: Plain text, mathematics in `$...$`.
+  - type: textarea
+    attributes:
+      label: Authors
+      description: One per line, as printed in the paper, `Family, Given|Affiliation` (the affiliation is optional).
+      placeholder: |
+        Doe, Jane|Example University
+        Roe, Richard
+  - type: textarea
+    attributes:
+      label: Abstract
+      description: Plain text, mathematics in `$...$`, paragraphs separated by blank lines.
+  - type: input
+    attributes:
+      label: Keywords
+      description: Separated by commas.
+  - type: dropdown
+    attributes:
+      label: Licence
+      description: 'Check what your publisher allows for papers published in journals. "All rights reserved": readers may read the paper, not copy it; CC BY 4.0: anyone may copy it, with credit. "Keep as before" is for a new version.'
+      options:
+        - CC BY 4.0 (cc-by-4.0)
+        - CC BY-SA 4.0 (cc-by-sa-4.0)
+        - CC0 1.0 (cc0-1.0)
+        - All rights reserved
+        - Keep as before (for a new version)
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: PDF of this version
+      description: Drag the PDF here.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Sources
+      description: Drag the sources here, preferably as one zip (GitHub does not accept every type of file, for instance `.tex`, as an attachment); the archive keeps exactly these files.
+  - type: input
+    attributes:
+      label: Main source
+      description: The main file, as a path inside the zip (for instance `paper.tex`). Can be left empty if the zip has a single source file at its top.
+  - type: input
+    attributes:
+      label: If there are no sources, why
+      description: For a paper deposited as a PDF alone, for instance "the sources were lost".
+  - type: textarea
+    attributes:
+      label: Related identifiers
+      description: One per line, for instance `IsIdenticalTo:arxiv:1508.07764` or `IsVersionOf:doi:10.1234/abcd`.
+  - type: input
+    attributes:
+      label: What changed (for a new version)
+  - type: input
+    attributes:
+      label: Date this version became public
+      description: YYYY-MM-DD. Empty for today.
+  - type: input
+    attributes:
+      label: Date the paper first appeared
+      description: YYYY-MM-DD, anywhere (for instance on arXiv). Empty to keep as before, or the date above.
+  - type: input
+    attributes:
+      label: In collection
+      description: The identifier of a subcollection of this repository; empty for the main collection.
+  - type: input
+    attributes:
+      label: Position
+      description: Where in the collection (1 for the first); empty for the end.

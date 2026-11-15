@@ -107,7 +107,7 @@ jobs:
           git push
       - name: Labels of the issue forms
         run: |
-          for l in "osheaf: add" "osheaf: vet" "osheaf: remove"; do
+          for l in "osheaf: add" "osheaf: vet" "osheaf: remove" "osheaf: document" "osheaf: subcollection"; do
             gh label create "$l" -R "$GITHUB_REPOSITORY" --color 5e6a78 --force >/dev/null || true
           done
       - name: GitHub Pages

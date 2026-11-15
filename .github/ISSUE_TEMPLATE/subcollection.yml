@@ -1,0 +1,40 @@
+name: New subcollection
+description: Create a collection inside this one (a section of a reading list, an issue of a journal, a week of a seminar).
+title: "Subcollection: "
+labels: ["osheaf: subcollection"]
+body:
+  - type: markdown
+    attributes:
+      value: A subcollection is a collection of this repository, listed as a member of another; its members are then added with the other forms, naming it in **In collection**. When it changes, the collections that include it are brought up to date. Only the curators can create one.
+  - type: input
+    attributes:
+      label: Identifier of the new subcollection
+      description: Permanent, part of its address. Lower-case letters and digits, words joined by `-`.
+      placeholder: week-1
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Title of the subcollection
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: Kind
+      description: A selection vets particular versions of its members; a catalogue follows them.
+      options:
+        - selection
+        - catalogue
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Description
+  - type: input
+    attributes:
+      label: In collection
+      description: Where to list it, the identifier of a subcollection; empty for the main collection.
+  - type: input
+    attributes:
+      label: Position
+      description: Where in that collection (1 for the first); empty for the end.

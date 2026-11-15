@@ -26,6 +26,10 @@ body:
       description: In a selection, the document versions you vet, e.g. `5` or `5, 6`; empty for the current version. Leave empty in a catalogue, which follows its members.
   - type: input
     attributes:
+      label: In collection
+      description: The identifier of a subcollection of this repository; empty for the main collection.
+  - type: input
+    attributes:
       label: Position
       description: Where in the list (1 for the first); empty for the end.
   - type: input
