@@ -1,0 +1,19 @@
+name: Remove a member
+description: Remove a member from this collection (earlier versions of the collection keep it).
+title: "Remove: "
+labels: ["osheaf: remove"]
+body:
+  - type: input
+    attributes:
+      label: Member to remove
+      description: The member's identifier.
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Archive of the member
+      description: Only if two members have the same identifier.
+  - type: input
+    attributes:
+      label: Why (optional)
+      description: Recorded with the new version of the collection.

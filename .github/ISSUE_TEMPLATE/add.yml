@@ -1,0 +1,34 @@
+name: Add a member
+description: Add a paper (or a collection) of an OpenSheaf archive to this collection.
+title: "Add: "
+labels: ["osheaf: add"]
+body:
+  - type: markdown
+    attributes:
+      value: Nothing is copied. The member is pinned by the digest of its inventory, read from its archive, so that the collection fixes exactly what it lists. Only the curators (the repository's owner and collaborators) can change the collection.
+  - type: input
+    attributes:
+      label: Archive of the new member
+      description: The address of the OpenSheaf archive that keeps it, the folder of its `opensheaf.json`.
+      placeholder: https://mgubi.org/papers/
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Identifier of the new member
+      description: The object's identifier in that archive (as in its address, `.../paper/IDENTIFIER/`).
+      placeholder: paracontrolled-distributions
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Versions you vet (selection)
+      description: In a selection, the document versions you vet, e.g. `5` or `5, 6`; empty for the current version. Leave empty in a catalogue, which follows its members.
+  - type: input
+    attributes:
+      label: Position
+      description: Where in the list (1 for the first); empty for the end.
+  - type: input
+    attributes:
+      label: Why (optional)
+      description: Recorded with the new version of the collection.

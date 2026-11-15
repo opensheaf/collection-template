@@ -27,6 +27,40 @@ command). For an archive of your own papers, use
 [archive-template](https://github.com/opensheaf/archive-template) instead
 (an archive can also hold collections).
 
+There are two ways to keep it: from the browser, without git or any
+installation (next section), or with the `osheaf` command (sections 1 to 5).
+Both give the same collection, and can be mixed.
+
+## From the browser
+
+1. Press **Use this template** on GitHub, for instance as a repository called
+   `reading-list`.
+2. In your new repository: **Actions**, **Set up the collection**, **Run
+   workflow**: the name, the kind (a **selection** vets particular versions,
+   such as a reading list or a journal issue; a **catalogue** follows its
+   members, such as the papers of a group), and your name. It replaces the
+   example `collection.yaml` with an empty list and sets the collection up.
+   Then turn GitHub Pages on (**Settings**, **Pages**, **Deploy from a
+   branch**, branch `main`, folder `/ (root)`), as the run's page says.
+3. **Issues**, **New issue**:
+   - **Add a member**: the address of the member's archive and the object's
+     identifier (and, in a selection, the versions you vet);
+   - **Vet a new version** (selections): a later version of a member;
+   - **Remove a member**.
+
+   The workflow `from issue` changes `collection.yaml`, runs `osheaf
+   collection sync`, publishes the site and answers in the issue.
+4. To follow new versions of the members: **Actions**, **Update the
+   collection**, **Run workflow**. A catalogue moves on; a selection never
+   changes by itself, and the run's page lists the versions you have not
+   vetted. To run it every week, add `schedule: [{cron: "0 6 * * 1"}]` under
+   `on:` in `.github/workflows/update.yml`.
+
+Only the owner of the repository and its collaborators can change the
+collection this way; issues opened by others are answered and closed. If
+something is wrong, the workflow says so in the issue and changes nothing:
+edit the issue, then close and reopen it to try again.
+
 ## 1. Make your copy
 
 Press **Use this template** on GitHub, clone your copy, and install the tools

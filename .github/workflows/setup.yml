@@ -1,0 +1,129 @@
+# Set the collection up from the browser (Actions tab, "Set up the
+# collection", "Run workflow"): runs osheaf init with the answers of the
+# form, writes an empty collection.yaml of the chosen kind, commits, creates
+# the labels of the issue forms, and says how to publish the site. Run once;
+# afterwards, add members with the issue form "Add a member".
+name: Set up the collection
+on:
+  workflow_dispatch:
+    inputs:
+      name:
+        description: The name of the collection, e.g. "A reading list on stochastic quantisation"
+        required: true
+      kind:
+        description: "selection: you vet particular versions (a reading list, a journal issue); catalogue: members are followed whatever their authors add (the papers of a group)"
+        type: choice
+        options: [selection, catalogue]
+        default: selection
+      description:
+        description: A sentence about the collection (optional)
+        required: false
+      curator:
+        description: Your name, as "Family, Given"
+        required: true
+      affiliation:
+        description: Your affiliation (optional)
+        required: false
+      contact:
+        description: A web page or mailto:address where you can be reached (optional)
+        required: false
+      archive_id:
+        description: The collection's permanent identifier, a tag URI (empty for tag:OWNER.github.io,YEAR:REPOSITORY)
+        required: false
+      base_url:
+        description: Where the site will be served (empty for https://OWNER.github.io/REPOSITORY/; if your GitHub Pages use your own domain, give it, e.g. https://example.org/REPOSITORY/)
+        required: false
+permissions:
+  contents: write
+  issues: write
+concurrency:
+  group: archive
+  cancel-in-progress: false
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      NAME: ${{ inputs.name }}
+      KIND: ${{ inputs.kind }}
+      DESCRIPTION: ${{ inputs.description }}
+      CURATOR: ${{ inputs.curator }}
+      AFFILIATION: ${{ inputs.affiliation }}
+      CONTACT: ${{ inputs.contact }}
+      ARCHIVE_ID: ${{ inputs.archive_id }}
+      BASE_URL: ${{ inputs.base_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.13"}
+      - run: pip install "opensheaf[validate] @ git+https://github.com/opensheaf/opensheaf-py"
+      - name: osheaf init
+        run: |
+          if [ -f osheaf.json ]; then
+            echo "This collection is already set up (osheaf.json exists): nothing to do." | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          owner=$(echo "${GITHUB_REPOSITORY%%/*}" | tr '[:upper:]' '[:lower:]')
+          repo="${GITHUB_REPOSITORY#*/}"
+          if [ -z "$BASE_URL" ]; then
+            if [ "$(echo "$repo" | tr '[:upper:]' '[:lower:]')" = "$owner.github.io" ]; then
+              BASE_URL="https://$owner.github.io/"
+            else
+              BASE_URL="https://$owner.github.io/$repo/"
+            fi
+          fi
+          case "$BASE_URL" in */) ;; *) BASE_URL="$BASE_URL/" ;; esac
+          if [ -z "$ARCHIVE_ID" ]; then
+            ARCHIVE_ID="tag:$owner.github.io,$(date -u +%Y):$(echo "$repo" | tr '[:upper:]' '[:lower:]')"
+          fi
+          args=(init . --curated --archive-id "$ARCHIVE_ID" --name "$NAME" --base-url "$BASE_URL" --curator "$CURATOR")
+          [ -n "$AFFILIATION" ] && args+=(--affiliation "$AFFILIATION")
+          [ -n "$CONTACT" ] && args+=(--contact "$CONTACT")
+          osheaf "${args[@]}"
+          # an empty member list of the chosen kind, replacing the template's example
+          python3 - <<'PY'
+          import os, yaml
+          from pathlib import Path
+          header = ("# The members of the collection, in order, for\n"
+                    "# `osheaf collection sync --from collection.yaml`: kept by the issue forms of\n"
+                    "# this repository (Issues, New issue) or by hand (see the README).\n")
+          data = {"title": os.environ["NAME"], "description": os.environ.get("DESCRIPTION") or "",
+                  "type": os.environ["KIND"], "order": "manual", "members": []}
+          if not data["description"]:
+              del data["description"]
+          Path("collection.yaml").write_text(header + yaml.safe_dump(data, sort_keys=False, allow_unicode=True), encoding="utf-8")
+          PY
+          osheaf collection sync --from collection.yaml --message "The collection is set up"
+          osheaf index
+          osheaf verify
+          echo "BASE_URL=$BASE_URL" >> "$GITHUB_ENV"
+          echo "ARCHIVE_ID=$ARCHIVE_ID" >> "$GITHUB_ENV"
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Set up the collection: $NAME"
+          git push
+      - name: Labels of the issue forms
+        run: |
+          for l in "osheaf: add" "osheaf: vet" "osheaf: remove"; do
+            gh label create "$l" -R "$GITHUB_REPOSITORY" --color 5e6a78 --force >/dev/null || true
+          done
+      - name: GitHub Pages
+        run: |
+          # the push above starts a build if Pages is on; turning it on usually
+          # needs the owner (Settings), which the workflow's token is not
+          if gh api "repos/$GITHUB_REPOSITORY/pages" >/dev/null 2>&1 \
+             || gh api -X POST "repos/$GITHUB_REPOSITORY/pages" -f "source[branch]=main" -f "source[path]=/" >/dev/null 2>&1; then
+            pages="GitHub Pages is on: the site will be at $BASE_URL within a few minutes."
+          else
+            pages="Turn GitHub Pages on: Settings, Pages, Deploy from a branch, branch main, folder / (root). The site will then be at $BASE_URL."
+          fi
+          {
+            echo "## The collection is set up"
+            echo
+            echo "- Identifier: \`$ARCHIVE_ID\` (it names the collection forever)."
+            echo "- $pages"
+            echo "- To add a member: Issues, New issue, **Add a member**."
+          } >> "$GITHUB_STEP_SUMMARY"

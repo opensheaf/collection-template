@@ -1,0 +1,75 @@
+# Members added, vetted or removed from the issue forms in
+# .github/ISSUE_TEMPLATE: for curators who use neither git nor the command
+# line. The workflow checks that the issue's author may write to the
+# repository, changes collection.yaml and runs osheaf
+# (.github/scripts/osheaf_issue.py), commits and publishes, and answers in
+# the issue. Close and reopen an issue to try again.
+name: from issue
+on:
+  issues:
+    types: [opened, reopened]
+permissions:
+  contents: write
+  issues: write
+concurrency:
+  group: archive
+  cancel-in-progress: false
+jobs:
+  operation:
+    if: >-
+      contains(github.event.issue.body, '### Archive of the new member') ||
+      contains(github.event.issue.body, '### Versions to vet') ||
+      contains(github.event.issue.body, '### Member to remove')
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GITHUB_TOKEN: ${{ github.token }}
+      ISSUE: ${{ github.event.issue.number }}
+      AUTHOR: ${{ github.event.issue.user.login }}
+    steps:
+      - name: Check that the author may write to the repository
+        run: |
+          perm=$(gh api "repos/$GITHUB_REPOSITORY/collaborators/$AUTHOR/permission" --jq .permission 2>/dev/null || echo none)
+          case "$perm" in
+            admin|maintain|write) echo "author $AUTHOR: $perm" ;;
+            *) gh issue comment "$ISSUE" -R "$GITHUB_REPOSITORY" --body "Only the curators of this collection (the repository's owner and collaborators) can change it, so nothing was done. To suggest a member, write to them." || true
+               gh issue close "$ISSUE" -R "$GITHUB_REPOSITORY" || true
+               exit 1 ;;
+          esac
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.13"}
+      - run: pip install "opensheaf[validate] @ git+https://github.com/opensheaf/opensheaf-py"
+      - name: Carry out the operation
+        id: op
+        run: |
+          set +e
+          RESULT_FILE="$RUNNER_TEMP/result.md" COMMIT_FILE="$RUNNER_TEMP/commit.txt" \
+            TITLE_FILE="$RUNNER_TEMP/title.txt" python3 .github/scripts/osheaf_issue.py
+          echo "status=$?" >> "$GITHUB_OUTPUT"
+      - name: Commit and publish
+        if: steps.op.outputs.status == '0'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -F "$RUNNER_TEMP/commit.txt"
+          git push
+      - name: Answer in the issue
+        if: always() && steps.op.outputs.status != ''
+        run: |
+          if [ -f "$RUNNER_TEMP/result.md" ]; then
+            gh issue comment "$ISSUE" -R "$GITHUB_REPOSITORY" --body-file "$RUNNER_TEMP/result.md"
+          fi
+          if [ "${{ steps.op.outputs.status }}" = "0" ] && [ "${{ job.status }}" = "success" ]; then
+            # the issue's title becomes the record of what was done
+            [ -s "$RUNNER_TEMP/title.txt" ] && gh issue edit "$ISSUE" -R "$GITHUB_REPOSITORY" --title "$(cat "$RUNNER_TEMP/title.txt")" >/dev/null || true
+            gh issue close "$ISSUE" -R "$GITHUB_REPOSITORY"
+          fi
+      - name: Report a failure of the workflow itself
+        if: failure() && steps.op.outputs.status == '0'
+        run: |
+          gh issue comment "$ISSUE" -R "$GITHUB_REPOSITORY" --body "The operation succeeded, but publishing it failed: see the run at $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID. Nothing was lost; reopen this issue to try again."
+      - name: Stop on an error
+        if: steps.op.outputs.status != '0'
+        run: exit 1

@@ -1,0 +1,40 @@
+# Bring the collection up to date (Actions tab, "Update the collection",
+# "Run workflow"): osheaf collection update. A catalogue moves its followed
+# members to the newest versions of their objects; a selection never
+# changes by itself: the run's page lists the versions of its members that
+# are not vetted, which can be vetted with the issue form "Vet a new
+# version". To run it every week, add a schedule (see the README).
+name: Update the collection
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: archive
+  cancel-in-progress: false
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.13"}
+      - run: pip install "opensheaf[validate] @ git+https://github.com/opensheaf/opensheaf-py"
+      - name: osheaf collection update
+        run: |
+          if [ ! -f osheaf.json ]; then echo "Not set up yet: run Set up the collection first." | tee -a "$GITHUB_STEP_SUMMARY"; exit 1; fi
+          out=$(osheaf collection update 2>&1); status=$?
+          { echo "## osheaf collection update"; echo; echo '```'; echo "$out"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          [ $status -eq 0 ] || exit $status
+          osheaf index
+          osheaf verify
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Nothing changed." >> "$GITHUB_STEP_SUMMARY"
+          else
+            git commit -q -m "Update the collection" && git push
+          fi
