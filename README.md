@@ -1,5 +1,12 @@
 # An OpenSheaf collection
 
+> [!IMPORTANT]
+> **This template is archived.** Collections (reading lists, journal issues,
+> catalogues) are now made with
+> [archive-template](https://github.com/opensheaf/archive-template), which serves
+> both an archive of papers and collections, from the browser or with `osheaf`
+> (see opensheaf/opensheaf.github.io#47). This repository is kept for reference.
+
 > [!WARNING]
 > **Draft.** OpenSheaf 0.1 is a draft specification. Until version 1.0, any
 > revision may change the format in incompatible ways. Archives and collections made now
